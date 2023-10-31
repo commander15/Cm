@@ -1,0 +1,23 @@
+{
+  "_description": "This file is created by CMake to be read by androiddeployqt and should not be modified by hand.",
+  "application-binary": "@QT_ANDROID_APPLICATION_BINARY@",
+  "architectures": {
+    @QT_ANDROID_ARCHITECTURES@
+  },
+  @QT_ANDROID_DEPLOYMENT_DEPENDENCIES@
+  @QT_ANDROID_EXTRA_PLUGINS@
+  @QT_ANDROID_PACKAGE_SOURCE_DIR@
+  @QT_ANDROID_VERSION_CODE@
+  @QT_ANDROID_VERSION_NAME@
+  @QT_ANDROID_EXTRA_LIBS@
+  @QT_QML_IMPORT_PATH@
+  "ndk": "@ANDROID_NDK@",
+  "ndk-host": "@ANDROID_HOST_TAG@",
+  "qml-root-path": "@CMAKE_CURRENT_SOURCE_DIR@",
+  "qt": "@QT_DIR@",
+  "sdk": "@ANDROID_SDK@",
+  "stdcpp-path": "@ANDROID_TOOLCHAIN_ROOT@/sysroot/usr/lib/",
+  "tool-prefix": "llvm",
+  "toolchain-prefix": "llvm",
+  "useLLVM": true
+}

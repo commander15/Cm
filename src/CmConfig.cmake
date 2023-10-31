@@ -1,0 +1,41 @@
+include(${CMAKE_CURRENT_LIST_DIR}/CmMacros.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CmInstall.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CmUtils.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CmInternals.cmake)
+
+macro(_cm_find_module Module)
+    set(FILE ${CMAKE_CURRENT_LIST_DIR}/Cm${Module}.cmake)
+
+    if (Cm${Module}_FOUND)
+    elseif (EXISTS ${FILE})
+        unset(CmModule)
+        unset(CmModuleGroup)
+        unset(CmModuleDependencies)
+        include(${FILE})
+
+        foreach (SubModule ${CmModuleGroup};${CmModuleDependencies})
+            _cm_find_module(${SubModule} ${Module})
+        endforeach()
+
+        set(Cm${Module}_FOUND TRUE)
+        #message("Cm ${Module} found")
+    elseif (TRUE)
+        message(FATAL_ERROR "Cm couldn't find ${Module} module needed by Cm ${ARGN}")
+    else()
+        message(FATAL_ERROR "Cm couldn't find ${Module} module")
+    endif()
+endmacro()
+
+foreach (Module ${Cm_FIND_COMPONENTS})
+    _cm_find_module(${Module})
+endforeach()
+
+if (ANDROID)
+    include(${CMAKE_CURRENT_LIST_DIR}/CmAndroidSupport.cmake)
+elseif(EMSCRIPTEN)
+    include(${CMAKE_CURRENT_LIST_DIR}/CmWasmSupport.cmake)
+endif()
+
+if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+    list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+endif()

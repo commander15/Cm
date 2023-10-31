@@ -1,0 +1,1 @@
+set(WASM TRUE)
