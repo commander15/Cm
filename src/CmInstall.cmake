@@ -74,7 +74,7 @@ function(cm_install type)
 
             get_target_property(SOURCES ${target} QML_SOURCES)
             if (QML AND SOURCES)
-                cm_install(FILES ${SOURCES} DESTINATION ${CM_INSTALL_PREFIX}/${RUNTIME_DESTINATION})
+                cm_install(FILES ${SOURCES} DESTINATION ${RUNTIME_DESTINATION})
             endif()
 
             #extract_destination(PUBLIC_DESTINATION  ${ARG_PUBLIC_HEADER})

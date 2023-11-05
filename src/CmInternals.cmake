@@ -10,6 +10,16 @@ function(cm_finalize_target target type)
             get_target_property(NAME ${target} PLUGIN_NAME)
             get_target_property(VERSION ${target} PLUGIN_VERSION)
             get_target_property(DIR ${target} LIBRARY_OUTPUT_DIRECTORY)
+            get_target_property(QML_SOURCES ${target} QML_SOURCES)
+
+            if (QML_SOURCES)
+                add_custom_command(TARGET ${target} PRE_BUILD
+                    COMMAND
+                        ${CMAKE_COMMAND} -E copy ${QML_SOURCES}
+                            ${DIR}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+                )
+            endif()
 
             add_custom_command(TARGET ${target} POST_BUILD
                 COMMAND
