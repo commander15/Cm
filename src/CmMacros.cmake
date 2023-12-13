@@ -1,3 +1,14 @@
+if (NOT CM_PLATFORM OR NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/Cm${CM_PLATFORM}Support.cmake)
+    set(CM_PLATFORM Default)
+    message(WARNING "Cm couldn't find support platform scripts, fallback to default")
+else()
+    include(${CMAKE_CURRENT_LIST_DIR}/Cm${CM_PLATFORM}Support.cmake)
+endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/CmDefaultSupport.cmake)
+
+string(TOLOWER ${CM_PLATFORM} platform)
+
 function(cm_add_package name)
     set(options)
     set(oneValueArgs NAME VERSION EXPORT)
@@ -25,13 +36,7 @@ function(cm_add_package name)
 endfunction()
 
 function(cm_add_executable name)
-    if (ANDROID)
-        list(REMOVE_ITEM ARGN WIN32 MACOSX_BUNDLE)
-        add_library(${name} SHARED ${ARGN})
-    else()
-        add_executable(${name} ${ARGN})
-    endif()
-    
+    cmake_language(CALL cm_add_${platform}_executable ${name} ${ARGN})
     cm_register_target(${name} EXECUTABLE)
 endfunction()
 
@@ -42,13 +47,7 @@ function(cm_add_plugin name)
 
     cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if (EMSCRIPTEN)
-        set(LIBRARY_TYPE STATIC)
-    else()
-        set(LIBRARY_TYPE MODULE)
-    endif()
-
-    add_library(${name} ${LIBRARY_TYPE}
+    cmake_language(CALL cm_add_${platform}_plugin ${name}
         ${ARG_QML_SOURCES} ${ARG_CPP_SOURCES}
         ${ARG_EXTRA_FILES} ${ARG_UNPARSED_ARGUMENTS}
     )
@@ -91,17 +90,20 @@ function(cm_add_plugin name)
 endfunction()
 
 function(cm_add_library name)
-    if (EMSCRIPTEN)
-        list(REMOVE_ITEMS ARGN STATIC SHARED MODULE)
-        list(PREPEND ARGN STATIC)
-    endif()
-    
-    add_library(${name} ${ARGN})
+    cmake_language(CALL cm_add_${platform}_library ${name} ${ARGN})
+
+    target_include_directories(${name}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
+            $<INSTALL_INTERFACE:include>
+    )
+
     cm_register_target(${name} LIBRARY)
 endfunction()
 
 function(cm_add_translation name)
-    add_custom_target(${name} SOURCES ${ARGN})
+    add_custom_target(${name} ALL SOURCES ${ARGN})
+
     cm_register_target(${name} TRANSLATION)
 endfunction()
 

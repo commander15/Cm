@@ -13,7 +13,7 @@
   @QT_QML_IMPORT_PATH@
   "ndk": "@ANDROID_NDK@",
   "ndk-host": "@ANDROID_HOST_TAG@",
-  "qml-root-path": "@CMAKE_CURRENT_SOURCE_DIR@",
+  "qml-root-path": "@QML_ROOT_PATH@",
   "qt": "@QT_DIR@",
   "sdk": "@ANDROID_SDK@",
   "stdcpp-path": "@ANDROID_TOOLCHAIN_ROOT@/sysroot/usr/lib/",

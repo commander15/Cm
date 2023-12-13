@@ -15,6 +15,8 @@ add_subdirectory(coreapp)
 
 add_subdirectory(qmlplugin)
 
+cm_install(PACKAGE exp DESTINATION lib/cmake)
+
 macro(show_prop prop target)
     get_target_property(val ${target} ${prop})
     message("${target}[${prop}] = ${val}")

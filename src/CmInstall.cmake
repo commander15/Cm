@@ -6,7 +6,11 @@ function(cm_install type)
     set(multiValueArgs PERMISSIONS CONFIGURATIONS)
     unset(INSTALL_ARGS)
 
-    if (${type} STREQUAL TARGETS)
+    set(NATIVE_INSTALL ON)
+
+    if (${type} STREQUAL PACKAGE)
+        set(NATIVE_INSTALL OFF)
+    elseif (${type} STREQUAL TARGETS)
         list(REMOVE_ITEM oneValueArgs DESTINATION)
 
         list(APPEND options)
@@ -92,7 +96,9 @@ function(cm_install type)
     string(JOIN " " INSTALL ${type} ${ARGN} ${INSTALL_ARGS})
     cm_message(INFO "install(${INSTALL}")
 
-    install(${type} ${ARGN} ${INSTALL_ARGS})
+    if (NATIVE_INSTALL)
+        install(${type} ${ARGN} ${INSTALL_ARGS})
+    endif()
 endfunction()
 
 set(CMAKE_COPY_PREFIX ${CMAKE_BINARY_DIR} CACHE PATH

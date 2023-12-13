@@ -1,3 +1,13 @@
+set(Cm_ROOT ${CMAKE_CURRENT_LIST_DIR}../../..)
+
+if (ANDROID)
+    set(CM_PLATFORM Android)
+elseif(EMSCRIPTEN)
+    set(CM_PLATFORM WASM)
+else()
+    set(CM_PLATFORM Default)
+endif()
+
 include(${CMAKE_CURRENT_LIST_DIR}/CmMacros.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CmInstall.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CmUtils.cmake)
@@ -29,12 +39,6 @@ endmacro()
 foreach (Module ${Cm_FIND_COMPONENTS})
     _cm_find_module(${Module})
 endforeach()
-
-if (ANDROID)
-    include(${CMAKE_CURRENT_LIST_DIR}/CmAndroidSupport.cmake)
-elseif(EMSCRIPTEN)
-    include(${CMAKE_CURRENT_LIST_DIR}/CmWasmSupport.cmake)
-endif()
 
 if (EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
     list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)

@@ -1,5 +1,5 @@
 set(CmModule QtQuick)
 set(CmModuleGroup Qt)
-set(CmModuleDependencies QtGui)
+set(CmModuleDependencies QtQml QtGui)
 
-list(APPEND CmQtModules Quick Qml)
+list(APPEND CmQtModules Quick)

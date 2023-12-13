@@ -2,6 +2,7 @@ add_custom_target(Cm
     SOURCES
         CmConfig.cmake
         CmMacros.cmake
+        CmDefaultSupport.cmake
         CmInstall.cmake
         CmUtils.cmake
         CmInternals.cmake
@@ -9,6 +10,7 @@ add_custom_target(Cm
         CmQtCore.cmake
         CmQtGui.cmake
         CmQtQuick.cmake
+        CmQtQml.cmake
         CmQtWidgets.cmake
         CmQtLinguist.cmake
 )

@@ -1,5 +1,15 @@
 find_program(qmlplugindump qmlplugindump)
 
+function(cm_register_target target type)
+    set_target_properties(${target} PROPERTIES CM_TYPE ${type})
+
+    if (${type} IN_LIST "EXECUTABLE;PLUGIN;LIBRARY")
+        string(TOLOWER ${type} artifact)
+        cmake_language(EVAL CODE "cmake_language(CALL cm_initialize_${platform}_${artifact} ${target})")
+        cmake_language(EVAL CODE "cmake_language(DEFER CALL cm_finalize_${platform}_${artifact} ${target})")
+    endif()
+endfunction()
+
 function(cm_initialize_target target type)
 endfunction()
 
@@ -50,13 +60,6 @@ function(cm_finalize_target target type)
                 ${NAME}_LIB_BUILD
         )
     endif()
-endfunction()
-
-function(cm_register_target target type)
-    set_target_properties(${target} PROPERTIES CM_TYPE ${type})
-
-    cm_initialize_target(${target} ${type})
-    cmake_language(EVAL CODE "cmake_language(DEFER CALL cm_finalize_target ${target} ${type})")
 endfunction()
 
 function(cm_message type)
