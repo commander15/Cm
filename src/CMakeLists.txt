@@ -1,38 +1,30 @@
-add_custom_target(Cm
+include(CMakePackageConfigHelpers)
+
+set(ROOT ".")
+
+configure_package_config_file(CmConfig.cmake.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/CmConfig.cmake
+    INSTALL_DESTINATION ${CM_INSTALL_PATH}
+    PATH_VARS ROOT
+)
+
+#write_basic_package_version_file(
+#    ${CMAKE_CURRENT_SOURCE_DIR}/CmConfigVersion.cmake
+#    VERSION       ${Cm_VERSION}
+#    COMPATIBILITY AnyNewerVersion
+#    ARCH_INDEPENDENT
+#)
+
+add_custom_target(cm
     SOURCES
         CmConfig.cmake
+        CmConfigVersion.cmake
         CmMacros.cmake
-        CmDefaultSupport.cmake
-        CmInstall.cmake
+        CmTargetsMacros.cmake
         CmUtils.cmake
         CmInternals.cmake
-        CmQt.cmake
-        CmQtCore.cmake
-        CmQtGui.cmake
-        CmQtQuick.cmake
-        CmQtQml.cmake
-        CmQtWidgets.cmake
-        CmQtLinguist.cmake
 )
 
-set(VERSION_FILE ${CMAKE_BINARY_DIR}/lib/cmake/Cm/CmConfigVersion.cmake)
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    ${VERSION_FILE}
-    VERSION       ${Cm_VERSION}
-    COMPATIBILITY SameMajorVersion
-    ARCH_INDEPENDENT
-)
-
-if (ANDROID)
-    target_sources(Cm PRIVATE CmAndroidSupport.cmake)
-elseif (EMSCIPTEN)
-    target_sources(Cm PRIVATE CmWasmSupport.cmake)
-endif()
-
-get_target_property(SOURCES Cm SOURCES)
-list(APPEND SOURCES ${VERSION_FILE})
-
-set(DESTINATION lib/cmake/Cm)
-file(COPY ${SOURCES} DESTINATION ${CMAKE_BINARY_DIR}/${DESTINATION})
-install(FILES ${SOURCES} DESTINATION ${DESTINATION})
+get_target_property(SOURCES cm SOURCES)
+file(COPY ${SOURCES} DESTINATION ${CM_ROOT_PATH})
+install(FILES ${SOURCES} DESTINATION ${CM_INSTALL_PATH})

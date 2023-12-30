@@ -1,25 +1,28 @@
-set(Cm_DIR ${CMAKE_BINARY_DIR}/lib/cmake/Cm)
+set(Cm_DIR ${CM_ROOT_PATH} CACHE STRING "" FORCE)
 
-find_package(Cm REQUIRED COMPONENTS QtWidgets QtQuick QtLinguist)
+find_package(Cm REQUIRED)
+find_package(Qt6 REQUIRED COMPONENTS Core)
 
-find_package(Qt5 REQUIRED COMPONENTS ${CmQtModules})
-
-cm_add_package(exp
-    NAME    CmExample
-    VERSION 1.0
+cm_add_package(examples
+    NAME         CmExamples
+    VERSION      1.2
+    CONFIG_FILE  CmExamplesConfig.cmake
+    EXPORTS      CmExamplesTargets CmExamplesTargets2
 )
 
-#add_subdirectory(widgetapp)
-add_subdirectory(qmlapp)
-add_subdirectory(coreapp)
+cm_add_library(hello hello.cpp)
+cm_install(TARGETS hello
+    EXPORT  CmExamplesTargets
+    ARCHIVE DESTINATION lib
+    LIBRARY DESTINATION lib
+    RUNTIME DESTINATION bin
+)
 
-add_subdirectory(qmlplugin)
+cm_add_executable(hello1 hello.cpp)
+cm_add_executable(hello2 hello)
+cm_install(TARGETS hello1 hello2
+    EXPORT  CmExamplesTargets2
+    RUNTIME DESTINATION bin
+)
 
-cm_install(PACKAGE exp DESTINATION lib/cmake)
-
-macro(show_prop prop target)
-    get_target_property(val ${target} ${prop})
-    message("${target}[${prop}] = ${val}")
-endmacro()
-
-show_prop(TYPE qmlapp)
+cm_install(PACKAGES examples DESTINATION lib/cmake)

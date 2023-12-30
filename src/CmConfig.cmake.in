@@ -1,0 +1,35 @@
+cmake_minimum_required(VERSION 3.20)
+
+@PACKAGE_INIT@
+
+set(Cm_ROOT            "@PACKAGE_ROOT@")
+set(Cm_QML_IMPORT_PATH "@PACKAGE_QML_IMPORT_PATH@")
+
+include(${CMAKE_CURRENT_LIST_DIR}/CmMacros.cmake)
+#include(${CMAKE_CURRENT_LIST_DIR}/CmTargets.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CmUtils.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CmInternals.cmake)
+
+include(GNUInstallDirs)
+
+cm_init()
+
+### Qt
+
+set(CMAKE_AUTOMOC ON)
+
+### Global package file search
+
+if (UNIX)
+    set(GLOBAL_PACKAGE_FILE "/opt/Commander/")
+elseif(WIN32)
+    set(GLOBAL_PACKAGE_FILE "C:/Commander/")
+endif()
+
+string(APPEND GLOBAL_PACKAGE_FILE "CmPackages.cmake")
+
+if (EXISTS ${GLOBAL_PACKAGE_FILE})
+    include(${GLOBAL_PACKAGE_FILE})
+endif()
+
+unset(GLOBAL_PACKAGE_FILE)

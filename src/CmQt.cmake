@@ -1,1 +1,0 @@
-set(CmModule Qt)

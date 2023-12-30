@@ -1,4 +1,7 @@
+### Headers Management
+
 function(cm_generate_nested_headers destination)
+    # Check if the header file exists and generate nested header file accordingly
     foreach (header ${ARGN})
         if (EXISTS ${header})
             file(RELATIVE_PATH path ${destination} ${header})
@@ -13,23 +16,12 @@ function(cm_generate_nested_headers destination)
     endforeach()
 endfunction()
 
-macro(cm_get_target_name name target)
-    get_target_property(${name} ${target} OUTPUT_NAME)
-    if (NOT ${name})
-        set(${name} ${target})
-    endif()
-endmacro()
+### Messages Management
 
-macro(cm_get_target_output_location location target)
-    get_target_property(type ${target} TYPE)
-    if (type STREQUAL EXECUTABLE)
-        cm_get_target_property(${location} ${target})
-    endif()
-endmacro()
+function(cm_message type)
+    message(${type} "Cm: ${ARGN}")
+endfunction()
 
-macro(cm_get_target_property var target prop def)
-    get_target_property(${var} ${target} ${prop})
-    if (NOT ${var})
-        set(${var} ${def})
-    endif()
-endmacro()
+function(cm_log level)
+    message("Cm: ${ARGN}")
+endfunction()

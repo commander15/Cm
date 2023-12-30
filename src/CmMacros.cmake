@@ -1,137 +1,49 @@
-if (NOT CM_PLATFORM OR NOT EXISTS ${CMAKE_CURRENT_LIST_DIR}/Cm${CM_PLATFORM}Support.cmake)
-    set(CM_PLATFORM Default)
-    message(WARNING "Cm couldn't find support platform scripts, fallback to default")
-else()
-    include(${CMAKE_CURRENT_LIST_DIR}/Cm${CM_PLATFORM}Support.cmake)
-endif()
+function(cm_init)
+    set(SUPPORTS)
 
-include(${CMAKE_CURRENT_LIST_DIR}/CmDefaultSupport.cmake)
-
-string(TOLOWER ${CM_PLATFORM} platform)
-
-function(cm_add_package name)
-    set(options)
-    set(oneValueArgs NAME VERSION EXPORT)
-    set(multiValueArgs)
-
-    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    set(DIR ${CMAKE_CURRENT_BINARY_DIR}/${name}_pkg)
-    cm_generate_package_config_file(${DIR}/${ARG_NAME}Config.cmake NAME ${ARG_NAME})
-    cm_generate_package_version_file(${DIR}/${ARG_NAME}ConfigVersion.cmake VERSION ${ARG_VERSION})
-
-    add_custom_target(${name}
-        SOURCES ${ARG_UNPARSED_ARGUMENTS}
-    )
-
-    if (NOT ARG_EXPORT)
-        set(ARG_EXPORT ${ARG_NAME}Targets)
+    if (Qt6Qml_FOUND)
+        list(APPEND SUPPORTS QML_SUPPORT)
     endif()
 
-    set_target_properties(${name} PROPERTIES
-        EXPORT_NAME ${ARG_EXPORT}
-    )
-
-    cm_register_target(${name} PACKAGE)
-endfunction()
-
-function(cm_add_executable name)
-    cmake_language(CALL cm_add_${platform}_executable ${name} ${ARGN})
-    cm_register_target(${name} EXECUTABLE)
-endfunction()
-
-function(cm_add_plugin name)
-    set(options QML)
-    set(oneValueArgs NAME VERSION GROUP)
-    set(multiValueArgs QML_SOURCES CPP_SOURCES EXTRA_FILES)
-
-    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-
-    cmake_language(CALL cm_add_${platform}_plugin ${name}
-        ${ARG_QML_SOURCES} ${ARG_CPP_SOURCES}
-        ${ARG_EXTRA_FILES} ${ARG_UNPARSED_ARGUMENTS}
-    )
-
-    if (NOT ARG_NAME)
-        set(ARG_NAME ${name})
+    if (Qt6Core_FOUND)
+        list(APPEND SUPPORTS QT_SUPPORT)
     endif()
 
-    if (NOT ARG_VERSION)
-        set(ARG_VERSION ${CMAKE_PROJECT_VERSION_MAJOR}.${CMAKE_PROJECT_VERSION_MINOR})
-    endif()
+    cm_init_project(${CMAKE_PROJECT_NAME} CMAKE_SUPPORT ${SUPPORTS})
 
-    set(QML_PLUGIN FALSE)
-    if (ARG_QML OR ARG_QML_SOURCES)
-        set(DIR qml/${ARG_NAME})
-        list(APPEND ARG_EXTRA_FILES ${ARG_QML_SOURCES})
-        source_group(Qml/files FILES ${ARG_QML_FILES})
-        set(QML_PLUGIN TRUE)
-
-        set(QMLDIR ${CMAKE_CURRENT_SOURCE_DIR}/qmldir)
-        if (EXISTS ${QMLDIR})
-            list(PREPEND ARG_QML_SOURCES ${QMLDIR})
-        endif()
-    elseif (ARG_GROUP)
-        set(DIR plugins/${ARG_GROUP}/${ARG_NAME})
-    else()
-        set(DIR plugins/${ARG_NAME})
-    endif()
-
-    set_target_properties(${name} PROPERTIES
-        PLUGIN_NAME    ${ARG_NAME}
-        PLUGIN_VERSION ${ARG_VERSION}
-        PLUGIN_DIR     "${DIR}"
-        PLUGIN_FILES   "${ARG_EXTRA_FILES}"
-        QML_PLUGIN     "${QML_PLUGIN}"
-        QML_SOURCES    "${ARG_QML_SOURCES}"
+    set(CM_GENERATION ON
+        CACHE BOOL
+        "Enable Install Directory Structure replication in binary dir"
     )
-
-    cm_register_target(${name} PLUGIN)
 endfunction()
 
-function(cm_add_library name)
-    cmake_language(CALL cm_add_${platform}_library ${name} ${ARGN})
-
-    target_include_directories(${name}
-        PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_BINARY_DIR}/include>
-            $<INSTALL_INTERFACE:include>
-    )
-
-    cm_register_target(${name} LIBRARY)
-endfunction()
-
-function(cm_add_translation name)
-    add_custom_target(${name} ALL SOURCES ${ARGN})
-
-    cm_register_target(${name} TRANSLATION)
-endfunction()
-
-function(target_headers target)
-    set(options)
+function(cm_init_project name)
+    set(options CMAKE_SUPPORT QML_SUPPORT QT_SUPPORT)
     set(oneValueArgs)
-    set(multiValueArgs PUBLIC PRIVATE)
+    set(multiValueArgs)
     cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    if (ARG_PUBLIC)
-        list(TRANSFORM ARG_PUBLIC PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/)
-
-        get_target_property(HEADERS ${target} PUBLIC_HEADER)
-        if (NOT HEADERS)
-            set_target_properties(${target} PROPERTIES PUBLIC_HEADER "${ARG_PUBLIC}")
-        else()
-            set_target_properties(${target} PROPERTIES PUBLIC_HEADER "${HEADERS};${ARG_PUBLIC}")
-        endif()
+    if (ARG_CMAKE_SUPPORT)
+        set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/lib)
+        set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
     endif()
 
-    if (ARG_PRIVATE)
-        list(TRANSFORM ARG_PRIVATE PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/)
+    if (ARG_QML_SUPPORT)
+        set(CMAKE_AUTORCC ON)
+        set(QT_QML_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/qml)
 
-        get_target_property(HEADERS ${target} PRIVATE_HEADER)
-        if (NOT HEADERS)
-            set_target_properties(${target} PROPERTIES PRIVATE_HEADER "${ARG_PRIVATE}")
-        else()
-            set_target_properties(${target} PROPERTIES PRIVATE_HEADER "${HEADERS};${ARG_PRIVATE}")
-        endif()
+        set(ARG_QT_SUPPORT ON)
+
+        qt_policy(SET QTP0001 NEW)
+    endif()
+
+    if (ARG_QT_SUPPORT)
+        set(CMAKE_AUTOMOC ON)
+    endif()
+
+    if (ARG_ANDROID_SUPPORT)
+        qt_policy(SET QTP0000 NEW)
     endif()
 endfunction()
+
+include(${CMAKE_CURRENT_LIST_DIR}/CmTargetsMacros.cmake)
